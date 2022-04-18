@@ -38,27 +38,34 @@ data class Lambda2(
     var body: Expression
 ) : ASTNode()
 
-sealed class Expression : ASTNode() {
-    data class NumberNode(var value: Float) : Expression()
-    data class NameNode(var value: String) : Expression()
-    data class AddNode(var operands: List<Expression>) : Expression()
-    data class SubNode(var operands: List<Expression>) : Expression()
-    data class MulNode(var operands: List<Expression>) : Expression()
-    data class DivNode(var operands: List<Expression>) : Expression()
-    data class PowNode(var operands: List<Expression>) : Expression()
-    data class SequenceRange(var from: Expression, var to: Expression) : Expression()
-    data class Sequence(var operands: List<Expression>) : Expression()
+
+enum class ExpressionType {
+    Number,
+    Sequence,
+    Unknown
+}
+
+sealed class Expression(val type : ExpressionType) : ASTNode() {
+    data class NumberNode(val value: Float) : Expression(ExpressionType.Number)
+    data class NameNode(val value: String) : Expression(ExpressionType.Unknown)
+    data class AddNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
+    data class SubNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
+    data class MulNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
+    data class DivNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
+    data class PowNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
+    data class SequenceRange(val from: Expression, val to: Expression) : Expression(ExpressionType.Sequence)
+    data class Sequence(val operands: List<Expression>) : Expression(ExpressionType.Sequence)
 
     data class Map(
-        var sequence: Expression,
-        var mapper: Lambda1
-    ) : Expression()
+        val sequence: Expression,
+        val mapper: Lambda1
+    ) : Expression(ExpressionType.Unknown)
 
     data class Reduce(
-        var sequence: Expression,
-        var primer: Expression,
-        var reducer: Lambda2
-    ) : Expression()
+        val sequence: Expression,
+        val primer: Expression,
+        val reducer: Lambda2
+    ) : Expression(ExpressionType.Unknown)
 }
 
 
