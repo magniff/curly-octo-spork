@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.*
 import KotZen.parse
 
 import Evaluator.*
+import Result.*
 import Parser.*
 
 internal class EvaluatorKtTest {
@@ -14,7 +15,7 @@ internal class EvaluatorKtTest {
          * var == 10
          */
         assertEquals(
-            Expression.NumberNode(10.0.toFloat()),
+            Success(Expression.NumberNode(10.0.toFloat())),
             evaluateExpression(
                 Expression.NameNode("var"),
                 mapOf(Expression.NameNode("var") to Expression.NumberNode(10.0.toFloat()))
@@ -28,7 +29,7 @@ internal class EvaluatorKtTest {
          * 10 == 10
          */
         assertEquals(
-            Expression.NumberNode(10.0.toFloat()),
+            Success(Expression.NumberNode(10.0.toFloat())),
             evaluateExpression(Expression.NumberNode(10.0.toFloat()), emptyMap())
         )
     }
@@ -38,11 +39,13 @@ internal class EvaluatorKtTest {
          * {0 .. 2} == {0, 1, 2}
          */
         assertEquals(
-            Expression.Sequence(
-                listOf(
-                    Expression.NumberNode(0.0.toFloat()),
-                    Expression.NumberNode(1.0.toFloat()),
-                    Expression.NumberNode(2.0.toFloat())
+            Success(
+                Expression.Sequence(
+                    listOf(
+                        Expression.NumberNode(0.0.toFloat()),
+                        Expression.NumberNode(1.0.toFloat()),
+                        Expression.NumberNode(2.0.toFloat())
+                    )
                 )
             ),
             evaluateExpression(
@@ -57,13 +60,15 @@ internal class EvaluatorKtTest {
          * {0 .. 1 + 3} == {0, 1, 2, 3, 4}
          */
         assertEquals(
-            Expression.Sequence(
-                listOf(
-                    Expression.NumberNode(0.0.toFloat()),
-                    Expression.NumberNode(1.0.toFloat()),
-                    Expression.NumberNode(2.0.toFloat()),
-                    Expression.NumberNode(3.0.toFloat()),
-                    Expression.NumberNode(4.0.toFloat())
+            Success(
+                Expression.Sequence(
+                    listOf(
+                        Expression.NumberNode(0.0.toFloat()),
+                        Expression.NumberNode(1.0.toFloat()),
+                        Expression.NumberNode(2.0.toFloat()),
+                        Expression.NumberNode(3.0.toFloat()),
+                        Expression.NumberNode(4.0.toFloat())
+                    )
                 )
             ),
             evaluateExpression(
@@ -86,7 +91,7 @@ internal class EvaluatorKtTest {
          * 5 + 6 + 7 + 8 == 26
          */
         assertEquals(
-            Expression.NumberNode(26.0.toFloat()),
+            Success(Expression.NumberNode(26.0.toFloat())),
             evaluateExpression(
                 Expression.AddNode(
                     listOf(
@@ -105,7 +110,7 @@ internal class EvaluatorKtTest {
          * a + b + c + d == 26
          */
         assertEquals(
-            Expression.NumberNode(26.0.toFloat()),
+            Success(Expression.NumberNode(26.0.toFloat())),
             evaluateExpression(
                 Expression.AddNode(
                     listOf(
@@ -130,7 +135,7 @@ internal class EvaluatorKtTest {
          * 5 * 6 * 7 == 210
          */
         assertEquals(
-            Expression.NumberNode(210.0.toFloat()),
+            Success(Expression.NumberNode(210.0.toFloat())),
             evaluateExpression(
                 Expression.MulNode(
                     listOf(
@@ -150,7 +155,7 @@ internal class EvaluatorKtTest {
          * though associativity for ^ is often chosen the other way around
          */
         assertEquals(
-            Expression.NumberNode(4096.0.toFloat()),
+            Success(Expression.NumberNode(4096.0.toFloat())),
             evaluateExpression(
                 Expression.PowNode(
                     listOf(
@@ -169,7 +174,7 @@ internal class EvaluatorKtTest {
          * 5 - 6 - 7 == -8
          */
         assertEquals(
-            Expression.NumberNode(-8.0.toFloat()),
+            Success(Expression.NumberNode(-8.0.toFloat())),
             evaluateExpression(
                 Expression.SubNode(
                     listOf(
@@ -188,7 +193,7 @@ internal class EvaluatorKtTest {
          * 4 / 8 / 2 == 0.25
          */
         assertEquals(
-            Expression.NumberNode(0.25.toFloat()),
+            Success(Expression.NumberNode(0.25.toFloat())),
             evaluateExpression(
                 Expression.DivNode(
                     listOf(
@@ -207,11 +212,13 @@ internal class EvaluatorKtTest {
          * map({1, 1 + 1, 3}, value -> value + 1) == {2, 3, 4}
          */
         assertEquals(
-            Expression.Sequence(
-                listOf(
-                    Expression.NumberNode(2.0.toFloat()),
-                    Expression.NumberNode(3.0.toFloat()),
-                    Expression.NumberNode(4.0.toFloat()),
+            Success(
+                Expression.Sequence(
+                    listOf(
+                        Expression.NumberNode(2.0.toFloat()),
+                        Expression.NumberNode(3.0.toFloat()),
+                        Expression.NumberNode(4.0.toFloat()),
+                    )
                 )
             ),
             evaluateExpression(
@@ -245,13 +252,15 @@ internal class EvaluatorKtTest {
          * map({0 .. 4}, value -> value + 1) == {1, 2, 3, 4, 5}
          */
         assertEquals(
-            Expression.Sequence(
-                listOf(
-                    Expression.NumberNode(1.0.toFloat()),
-                    Expression.NumberNode(2.0.toFloat()),
-                    Expression.NumberNode(3.0.toFloat()),
-                    Expression.NumberNode(4.0.toFloat()),
-                    Expression.NumberNode(5.0.toFloat()),
+            Success(
+                Expression.Sequence(
+                    listOf(
+                        Expression.NumberNode(1.0.toFloat()),
+                        Expression.NumberNode(2.0.toFloat()),
+                        Expression.NumberNode(3.0.toFloat()),
+                        Expression.NumberNode(4.0.toFloat()),
+                        Expression.NumberNode(5.0.toFloat()),
+                    )
                 )
             ),
             evaluateExpression(
@@ -280,7 +289,7 @@ internal class EvaluatorKtTest {
          * reduce({}, 5, x y -> x + y) == 5
          */
         assertEquals(
-            Expression.NumberNode(5.0.toFloat()),
+            Success(Expression.NumberNode(5.0.toFloat())),
             evaluateExpression(
                 Expression.Reduce(
                     Expression.Sequence(
@@ -305,7 +314,7 @@ internal class EvaluatorKtTest {
          * reduce({1}, 0, x y -> x + y) == 1
          */
         assertEquals(
-            Expression.NumberNode(1.0.toFloat()),
+            Success(Expression.NumberNode(1.0.toFloat())),
             evaluateExpression(
                 Expression.Reduce(
                     Expression.Sequence(
@@ -332,7 +341,7 @@ internal class EvaluatorKtTest {
          * reduce({1, 2, 3}, 0, x y -> x + y) == 6
          */
         assertEquals(
-            Expression.NumberNode(6.0.toFloat()),
+            Success(Expression.NumberNode(6.0.toFloat())),
             evaluateExpression(
                 Expression.Reduce(
                     Expression.Sequence(
@@ -361,21 +370,21 @@ internal class EvaluatorKtTest {
     @Test
     fun test_printNumber() {
         assertEquals(
-            "-5.0",
+            Success("-5.0"),
             expressionToString(
                 Expression.NumberNode(-5.0.toFloat()),
                 emptyMap()
             )
         )
         assertEquals(
-            "0.0",
+            Success("0.0"),
             expressionToString(
                 Expression.NumberNode(0.0.toFloat()),
                 emptyMap()
             )
         )
         assertEquals(
-            "10.0",
+            Success("10.0"),
             expressionToString(
                 Expression.NumberNode(10.0.toFloat()),
                 emptyMap()
@@ -385,7 +394,7 @@ internal class EvaluatorKtTest {
     @Test
     fun test_printSequence() {
         assertEquals(
-            "{}",
+            Success("{}"),
             expressionToString(
                 Expression.Sequence(
                     listOf(
@@ -395,7 +404,7 @@ internal class EvaluatorKtTest {
             )
         )
         assertEquals(
-            "{0.0, 1.0, 2.0}",
+            Success("{0.0, 1.0, 2.0}"),
             expressionToString(
                 Expression.Sequence(
                     listOf(
@@ -408,7 +417,7 @@ internal class EvaluatorKtTest {
             )
         )
         assertEquals(
-            "{0.0, 1.0, 2.0}",
+            Success("{0.0, 1.0, 2.0}"),
             expressionToString(
                 Expression.SequenceRange(
                     Expression.NumberNode(0.0.toFloat()),
@@ -421,14 +430,14 @@ internal class EvaluatorKtTest {
     @Test
     fun test_printName() {
         assertEquals(
-            "10.0",
+            Success("10.0"),
             expressionToString(
                 Expression.NameNode("foo"),
                 mapOf(Expression.NameNode("foo") to Expression.NumberNode(10.0.toFloat()))
             )
         )
         assertEquals(
-            "10.0",
+            Success("10.0"),
             expressionToString(
                 Expression.NameNode("foo"),
                 mapOf(
@@ -456,7 +465,7 @@ internal class EvaluatorKtTest {
             out pi
        """
         assertEquals(
-            "pi is 3.143589",
+            Success("pi is 3.143589"),
             evaluateStmtList(
                 parser.wholeProgramP.parse(code).second!! as List<Statement>,
                 mutableMapOf()

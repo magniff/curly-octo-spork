@@ -24,3 +24,35 @@ fun <R, E, T> Result<R, E>.bind(fn: (R) -> Result<T, E>): Result<T, E> {
         is Failure -> Failure(this.reason)
     }
 }
+
+
+fun <R, E> Result<R, E>.isSuccess(): Boolean {
+    return when(this) {
+        is Success -> true
+        is Failure -> false
+    }
+}
+
+
+fun <T, E> T.success(): Result<T, E> {
+    return Success(this)
+}
+
+
+fun <T, E> E.fail(): Result<T, E> {
+    return Failure(this)
+}
+
+
+fun <R, E, T> Iterable<T>.mapM(fn: (T) -> Result<R, E>): Result<List<R>, E> {
+    var listToWrap: MutableList<R> = mutableListOf()
+    for (item in this) {
+        when(val mappingResult = fn(item)) {
+            is Success -> listToWrap.add(mappingResult.value)
+            is Failure -> {
+                return mappingResult
+            }
+        }
+    }
+    return listToWrap.success()
+}

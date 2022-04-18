@@ -4,9 +4,7 @@ import kotlin.math.pow
 
 import Parser.Expression
 import Parser.Statement
-import Result.Result
-import Result.Success
-import Result.Failure
+import Result.*
 
 typealias Context = Map<Expression.NameNode, Expression>
 typealias MutableContext = MutableMap<Expression.NameNode, Expression>
@@ -14,90 +12,129 @@ typealias MutableContext = MutableMap<Expression.NameNode, Expression>
 
 // Computes the value of expr.
 // context is read-only here
-fun evaluateExpression(expr: Expression, context: Context) : Expression {
+fun evaluateExpression(expr: Expression, context: Context) : Result<Expression, String> {
     return when (expr) {
         // Number is a normal form
-        is Expression.NumberNode -> expr
-        // This should be ensured by the typechecker, or... hmm
-        is Expression.NameNode -> context.get(expr)!!
+        is Expression.NumberNode -> expr.success()
+        // This should be ensured by the type checker, or... hmm
+        is Expression.NameNode -> {
+            context[expr]?.success() ?: ("Error: Unknown variable " + expr.value).fail()
+        }
         is Expression.Sequence ->
-            Expression.Sequence(
-                expr.operands.map {evaluateExpression(it, context)}
-            )
+            expr
+                .operands
+                .mapM {evaluateExpression(it, context)}
+                .map { Expression.Sequence(it) }
         is Expression.SequenceRange ->
-            Expression.Sequence(
-                (
-                    (evaluateExpression(expr.from, context) as Expression.NumberNode).value.toInt() ..
-                    (evaluateExpression(expr.to, context) as Expression.NumberNode).value.toInt()
-                )
-                .map {
-                    Expression.NumberNode(it.toFloat())
+            evaluateExpression(expr.from, context)
+                .bind {
+                    fromValue ->
+                        evaluateExpression(expr.to, context)
+                            .bind {
+                                toValue ->
+                                    Expression.Sequence(
+                                        ((fromValue as Expression.NumberNode).value.toInt()..
+                                        (toValue as Expression.NumberNode).value.toInt()
+                                        )
+                                        .map { Expression.NumberNode(it.toFloat()) }
+                                    )
+                                    .success()
+                            }
                 }
-            )
         is Expression.AddNode ->
-            Expression.NumberNode(
-                expr.operands
-                    .map {evaluateExpression(it, context)}
-                    .map {(it as Expression.NumberNode).value}
-                    .fold (0.0) {sum, elem -> sum + elem}
-                    .toFloat()
-            )
+            expr
+                .operands
+                .mapM {evaluateExpression(it, context)}
+                .map {expressions -> expressions.map {(it as Expression.NumberNode).value}}
+                .map {floats -> floats.fold (0.0) {sum, elem -> sum + elem} }
+                .map {Expression.NumberNode(it.toFloat())}
         is Expression.MulNode ->
-            Expression.NumberNode(
-                expr.operands
-                    .map {evaluateExpression(it, context)}
-                    .map {(it as Expression.NumberNode).value}
-                    .fold (1.0) {mul, elem -> mul * elem}
-                    .toFloat()
-            )
+            expr
+                .operands
+                .mapM {evaluateExpression(it, context)}
+                .map {expressions -> expressions.map {(it as Expression.NumberNode).value}}
+                .map {floats -> floats.fold (1.0) {sum, elem -> sum * elem} }
+                .map {Expression.NumberNode(it.toFloat())}
         is Expression.SubNode ->
-            Expression.NumberNode(
-                (evaluateExpression(expr.operands.first(), context) as Expression.NumberNode).value -
-                expr.operands
-                    .slice(1..expr.operands.size-1)
-                    .map {evaluateExpression(it, context)}
-                    .map {(it as Expression.NumberNode).value}
-                    .fold (0.0) {sum, elem -> sum + elem}
-                    .toFloat()
-            )
+            evaluateExpression(expr.operands.first(), context)
+                .bind {
+                    firstOne ->
+                        expr.operands
+                            .slice(1 until expr.operands.size)
+                            .mapM {evaluateExpression(it, context)}
+                            .map {expressions -> expressions.map {(it as Expression.NumberNode).value}}
+                            .map {floats -> floats.fold (0.0) {sum, elem -> sum + elem} }
+                            .map {Expression.NumberNode(it.toFloat()) }
+                            .bind {
+                                rest ->
+                                    Expression
+                                        .NumberNode((firstOne as Expression.NumberNode).value- rest.value)
+                                        .success()
+                            }
+                }
         is Expression.DivNode ->
-            Expression.NumberNode(
-                (evaluateExpression(expr.operands.first(), context) as Expression.NumberNode).value /
-                expr.operands
-                    .slice(1..expr.operands.size-1)
-                    .map {evaluateExpression(it, context)}
-                    .map {(it as Expression.NumberNode).value}
-                    .fold (1.0) {mul, elem -> mul * elem}
-                    .toFloat()
-            )
+            evaluateExpression(expr.operands.first(), context)
+                .bind {
+                    firstOne ->
+                        expr.operands
+                            .slice(1 until expr.operands.size)
+                            .mapM {evaluateExpression(it, context)}
+                            .map {expressions -> expressions.map {(it as Expression.NumberNode).value}}
+                            .map {floats -> floats.fold (1.0) {sum, elem -> sum * elem} }
+                            .map {Expression.NumberNode(it.toFloat()) }
+                            .bind {
+                                rest ->
+                                    Expression
+                                        .NumberNode((firstOne as Expression.NumberNode).value / rest.value )
+                                        .success()
+                            }
+                }
         is Expression.PowNode -> {
-            val primer = (evaluateExpression(expr.operands.first(), context) as Expression.NumberNode).value
-            Expression.NumberNode(
-                expr.operands
-                    .slice(1..expr.operands.size-1)
-                    .map {evaluateExpression(it, context)}
-                    .map {(it as Expression.NumberNode).value}
-                    .fold (primer) {sofar, elem -> sofar.pow(elem)}
-                    .toFloat()
-            )
+            evaluateExpression(expr.operands.first(), context)
+                .bind {
+                    primer ->
+                        expr.operands
+                            .slice(1 until expr.operands.size)
+                            .mapM {evaluateExpression(it, context)}
+                            .map {expressions -> expressions.map {(it as Expression.NumberNode).value}}
+                            .map {
+                                floats ->
+                                    floats
+                                        .fold((primer as Expression.NumberNode).value)
+                                        { soFar, elem -> soFar.pow(elem) }
+                            }
+                            .map {Expression.NumberNode(it)}
+                }
         }
         is Expression.Map -> {
-            var extendedContext = context.toMutableMap()
-            Expression.Sequence(
-                (evaluateExpression(expr.sequence, context) as Expression.Sequence)
-                .operands
-                .map {
-                    operand ->
-                        extendedContext.put(expr.mapper.abs1, operand)
-                        evaluateExpression(expr.mapper.body, extendedContext)
+            val extendedContext = context.toMutableMap()
+            evaluateExpression(expr.sequence, context)
+                .bind {
+                    sequence ->
+                        (sequence as Expression.Sequence).operands
+                            .mapM {
+                                operand ->
+                                    // Presence of that side effect kind of sucks ass
+                                    extendedContext[expr.mapper.abs1] = operand
+                                    evaluateExpression(expr.mapper.body, extendedContext)
+                            }
+                            .map {Expression.Sequence(it)}
                 }
-            )
         }
+        // FoldM just blew my mind, so here's an iterative version
         is Expression.Reduce -> {
-            var extendedContext = context.toMutableMap()
+            val extendedContext = context.toMutableMap()
+            val sequence = evaluateExpression(expr.sequence, context)
+            if (!sequence.isSuccess()) {
+                return sequence
+            }
             var resultSoFar = evaluateExpression(expr.primer, context)
-            for (member in (evaluateExpression(expr.sequence, context) as Expression.Sequence).operands) {
-                extendedContext.put(expr.reducer.abs1, resultSoFar)
+            // So, here we know that sequence evaluation succeeded
+            for (member in (sequence as Success<Expression.Sequence>).value.operands) {
+                if (!resultSoFar.isSuccess()) {
+                    return resultSoFar
+                }
+                extendedContext.put(expr.reducer.abs1, (resultSoFar as Success<Expression>).value)
                 extendedContext.put(expr.reducer.abs2, member)
                 resultSoFar = evaluateExpression(expr.reducer.body, extendedContext)
             }
@@ -107,45 +144,57 @@ fun evaluateExpression(expr: Expression, context: Context) : Expression {
 }
 
 
-fun expressionToString(expr: Expression, context: Context) : String {
+fun expressionToString(expr: Expression, context: Context) : Result<String, String> {
     return when(expr) {
-        is Expression.NumberNode -> expr.value.toString()
-        is Expression.NameNode -> expressionToString(context.get(expr)!!, context)
+        is Expression.NumberNode -> expr.value.toString().success()
+        is Expression.NameNode ->
+        {
+            val lookupResult = context[expr]
+            if (lookupResult == null) {
+                Failure("Error: unknown variable " + expr.value)
+            } else {
+                expressionToString(lookupResult, context)
+            }
+        }
         is Expression.Sequence -> {
             expr
                 .operands
-                .map { expressionToString(it, context) }
-                .joinToString( prefix="{", postfix="}", separator=", " )
+                .mapM { expressionToString(it, context) }
+                .map {
+                    it.joinToString( prefix="{", postfix="}", separator=", " )
+                }
         }
         // Anything in "non-normal" form should be normalized first
         // Here we could end up getting into an infinite loop, so WARNING and god bless you
-        else -> expressionToString(evaluateExpression(expr, context), context)
+        else -> evaluateExpression(expr, context).bind { expressionToString(it, context) }
     }
 }
 
 
-fun evaluateStatement(stmt: Statement, context: MutableContext) : String {
+fun evaluateStatement(stmt: Statement, context: MutableContext) : Result<String, String> {
     return when(stmt) {
         is Statement.VarDeclarationStmt ->
             {
                 // Normalize the expression inside, mutate the computation context
-                context.put(
-                    stmt.name,
-                    evaluateExpression(stmt.expression, context)
-                )
-                // There's nothing to add to the output
-                ""
+                evaluateExpression(stmt.expression, context)
+                    .bind {
+                        result ->
+                            context[stmt.name] = result
+                            "".success()
+                    }
             }
-        is Statement.PrintStmt -> stmt.string.value
+        is Statement.PrintStmt -> stmt.string.value.success()
         is Statement.OutStmt -> expressionToString(stmt.expression, context)
     }
 }
 
 
-fun evaluateStmtList(stmts: List<Statement>, context: MutableContext) : String {
+fun evaluateStmtList(stmts: List<Statement>, context: MutableContext) : Result<String, String> {
     return (
         stmts
-        .map { evaluateStatement(it, context) }
-        .joinToString(separator="")
+        .mapM { evaluateStatement(it, context) }
+        .map {
+            it.joinToString(separator="")
+        }
     )
 }
