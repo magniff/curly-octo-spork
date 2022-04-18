@@ -84,9 +84,14 @@ fun evaluateExpression(expr: Expression, context: Context) : Result<Expression, 
                             .map {Expression.NumberNode(it.toFloat()) }
                             .bind {
                                 rest ->
-                                    Expression
-                                        .NumberNode((firstOne as Expression.NumberNode).value / rest.value )
-                                        .success()
+                                    if (rest.value == 0.0.toFloat()) {
+                                        "Zero division occurred!".fail()
+
+                                    } else {
+                                        Expression
+                                            .NumberNode((firstOne as Expression.NumberNode).value / rest.value )
+                                            .success()
+                                    }
                             }
                 }
         is Expression.PowNode -> {
