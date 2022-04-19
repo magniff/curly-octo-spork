@@ -163,7 +163,11 @@ val decimal =
     integer
         .skipRight(char('.'))
         .bind {
-                i -> number.map { d -> "$i.$d".toDouble() }
+                beforeDot ->
+                    digit
+                        .atLeastOne()
+                        .map {it.joinToString("") }
+                        .map { afterDot -> "$beforeDot.$afterDot".toDouble() }
         }
         .or(integer.map(Int::toDouble))
 

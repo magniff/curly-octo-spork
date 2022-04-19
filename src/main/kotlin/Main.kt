@@ -30,10 +30,10 @@ val GREEN = Color(0, 200, 0, 20)
 fun TextBox(text: String, color: Color) {
     Box(
         modifier = Modifier
-            .height(32.dp)
-            .width(400.dp)
-            .background(color)
-            .padding(start = 10.dp),
+//            .height(32.dp)
+//            .width(400.dp)
+            .background(color),
+//            .padding(start = 10.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(text = text)
@@ -65,7 +65,7 @@ fun main() = application {
         state = rememberWindowState(width = 300.dp, height = 300.dp)
     ) {
         val inputBuffer = remember { mutableStateOf("") }
-        val outputBuffer = remember { mutableStateOf("") }
+        val outputBuffer = remember { mutableStateOf("No input...") }
         val isError = remember { mutableStateOf(false) }
 
         val parser = LangParser()
@@ -82,8 +82,13 @@ fun main() = application {
                                     outputBuffer.value = result.value
                                 }
                                 is Failure -> {
-                                    isError.value = true
-                                    outputBuffer.value = result.reason
+                                    if (inputBuffer.value != "") {
+                                        isError.value = true
+                                        outputBuffer.value = result.reason
+                                    } else {
+                                        isError.value = false
+                                        outputBuffer.value = "No input..."
+                                    }
                                 }
                             }
                     },

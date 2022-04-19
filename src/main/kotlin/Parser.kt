@@ -155,9 +155,7 @@ class LangParser {
     // Parses varnames.
     val nameP = alpha.atLeastOne().token().text().map { Expression.NameNode(it) }
     val stringP =
-        alpha
-            .or(digit)
-            .or(whitespace)
+        sat {it != '"'}
             .many()
             .between(char('"'), char('"'))
             .text()
