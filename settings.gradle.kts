@@ -1,4 +1,4 @@
-rootProject.name = "newkotlin"
+rootProject.name = "mylang"
 
 pluginManagement {
     repositories {

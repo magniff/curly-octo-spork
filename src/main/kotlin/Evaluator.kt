@@ -12,21 +12,15 @@ typealias Context = Map<Expression.NameNode, Expression>
 typealias MutableContext = MutableMap<Expression.NameNode, Expression>
 
 
-fun isInstance(expr: Expression, type: ExpressionType) : Result<Expression, String> {
-    return if (expr.type == type) {
-        expr.success()
-    } else {
-        "Type error occurred!".fail()
-    }
-}
-
-
-// Computes the value of expr.
-// context is read-only here
+/**
+ * Evaluates the expression
+ * @param expr Expression to evaluate
+ * @param context Current variable binding mapping
+ * @param expectType What type to expect at the end
+ * @return Fully evaluated expression or an error message
+ */
 fun evaluateExpression(
-    expr: Expression,
-    context: Context,
-    expectType: ExpressionType = ExpressionType.Unknown
+    expr: Expression, context: Context, expectType: ExpressionType = ExpressionType.Unknown
 ) : Result<Expression, String>
 {
     val evaluationResult = when (expr) {
@@ -34,7 +28,7 @@ fun evaluateExpression(
         is Expression.NumberNode -> expr.success()
         // This should be ensured by the type checker, or... hmm
         is Expression.NameNode -> {
-            context[expr]?.success() ?: ("Error: Unknown variable " + expr.value).fail()
+            context[expr]?.success() ?: ("Error: Unknown variable ${expr.value}").fail()
         }
         is Expression.Sequence ->
             expr
@@ -100,7 +94,8 @@ fun evaluateExpression(
                             .bind {
                                 rest ->
                                     if (rest.value == 0.0.toFloat()) {
-                                        "Zero division occurred!".fail()
+                                        "Trying to divide ${(firstOne as Expression.NumberNode).value} by zero, it's a no-no"
+                                            .fail()
                                     } else {
                                         Expression
                                             .NumberNode((firstOne as Expression.NumberNode).value / rest.value )
@@ -162,8 +157,20 @@ fun evaluateExpression(
     }
     return evaluationResult.bind {
         expression ->
-            if (expectType != ExpressionType.Unknown) {
-                isInstance(expression, expectType)
+            // While the evaluator is still happy, let us check the type of the result
+            if (expectType != ExpressionType.Unknown && expression.type != expectType) {
+                when(val expressionRepr = expressionToString(expression, context)) {
+                    is Success ->
+                        {
+                            (
+                                "Expression ${expressionRepr.value} should be a " +
+                                "${expectType}, yet it is a ${expression.type}"
+                            )
+                            .fail()
+                        }
+                    // This branch should be unreachable
+                    is Failure -> "Type error occurred, cannot elaborate on that...".fail()
+                }
             } else {
                 expression.success()
             }
