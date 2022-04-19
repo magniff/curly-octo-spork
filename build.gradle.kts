@@ -1,20 +1,25 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.compose.compose
+
 
 plugins {
-    kotlin("jvm") version "1.6.20"
-    application
+    kotlin("jvm") version "1.6.10"
+    id("org.jetbrains.compose") version "1.1.1"
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
+//group = "org.example"
+//version = "1.0-SNAPSHOT"
+//
 
 repositories {
     mavenCentral()
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    google()
 }
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("com.github.h0tk3y.betterParse:better-parse:0.4.3")
+    implementation(compose.desktop.currentOs)
 }
 
 tasks.test {
@@ -25,6 +30,8 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-application {
-    mainClass.set("MainKt")
+compose.desktop {
+    application {
+        mainClass = "MainKt"
+    }
 }

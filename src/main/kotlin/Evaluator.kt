@@ -101,7 +101,6 @@ fun evaluateExpression(
                                 rest ->
                                     if (rest.value == 0.0.toFloat()) {
                                         "Zero division occurred!".fail()
-
                                     } else {
                                         Expression
                                             .NumberNode((firstOne as Expression.NumberNode).value / rest.value )
