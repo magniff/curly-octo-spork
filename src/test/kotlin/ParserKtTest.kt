@@ -10,13 +10,11 @@ internal class ParserKtTest {
         assertEquals(Expression.NumberNode(10.0.toFloat()), LangParser().numberP.parse("10").second)
         assertEquals(Expression.NumberNode(2.0.toFloat()), LangParser().numberP.parse("2").second)
         assertEquals(Expression.NumberNode(-2.78.toFloat()), LangParser().numberP.parse(" -2.78   ").second)
-//        assertEquals(Expression.NumberNode(10.01.toFloat()), Parser().parse("10.01"))
     }
     @Test
     fun test_stringP() {
         assertEquals(StringNode("hello"), LangParser().stringP.parse("\"hello\"").second)
         assertEquals(StringNode("hello world"), LangParser().stringP.parse("\"hello world\"").second)
-        // assertEquals(StringNode(""), LangParser().stringP.parse(""))
     }
     @Test
     fun test_nameP() {

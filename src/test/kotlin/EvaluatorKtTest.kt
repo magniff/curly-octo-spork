@@ -419,7 +419,10 @@ internal class EvaluatorKtTest {
         assertEquals(
             Success("{0.0, 1.0, 2.0}"),
             expressionToString(
-                Expression.SequenceRange(
+  //application {
+//    mainClass.set("MainKt")
+//}
+              Expression.SequenceRange(
                     Expression.NumberNode(0.0.toFloat()),
                     Expression.NumberNode(2.0.toFloat()),
                 ),
