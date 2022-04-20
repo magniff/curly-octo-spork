@@ -43,7 +43,7 @@ fun TextBox(text: String, color: Color) {
 }
 
 
-fun processInput(input: String, parser: LangParser) : Result<String, String> {
+suspend fun processInput(input: String, parser: LangParser) : Result<String, String> {
     val globalContext: MutableContext = mutableMapOf()
     val (remaining, parserResult) = parser
         .wholeProgramP
@@ -84,25 +84,25 @@ suspend fun main() = awaitApplication {
                 // Draw the output
                 TextBox(outputBuffer.value, color = if (isError.value) RED else GREEN)
                 // Grab the user's input here
-                TextField(
-                    inputBuffer.value,
-                    {
-                        currentInput ->
-                            inputBuffer.value = currentInput
-                            when(val result = processInput(inputBuffer.value, parser)) {
-                                is Success -> {
-                                    isError.value = false
-                                    outputBuffer.value = result.value
-                                }
-                                is Failure -> {
-                                    isError.value = true
-                                    outputBuffer.value = result.reason
-                                }
-                            }
-                    },
-                    isError = isError.value,
-                    placeholder = {Text("Type your code here...")}
-                )
+//                TextField(
+//                    inputBuffer.value,
+//                    {
+//                        currentInput ->
+//                            inputBuffer.value = currentInput
+//                            when(val result = processInput(inputBuffer.value, parser)) {
+//                                is Success -> {
+//                                    isError.value = false
+//                                    outputBuffer.value = result.value
+//                                }
+//                                is Failure -> {
+//                                    isError.value = true
+//                                    outputBuffer.value = result.reason
+//                                }
+//                            }
+//                    },
+//                    isError = isError.value,
+//                    placeholder = {Text("Type your code here...")}
+//                )
             }
         }
     }

@@ -10,7 +10,7 @@ data class Success<out Success>(val value: Success) : Result<Success, Nothing>()
 data class Failure<out Failure>(val reason: Failure) : Result<Nothing, Failure>()
 
 
-fun <R, E, T> Result<R, E>.map(fn: (R) -> T): Result<T, E> {
+suspend fun <R, E, T> Result<R, E>.map(fn: suspend (R) -> T): Result<T, E> {
     return when(this) {
         is Success -> Success(fn(this.value))
         is Failure -> Failure(this.reason)
@@ -18,7 +18,7 @@ fun <R, E, T> Result<R, E>.map(fn: (R) -> T): Result<T, E> {
 }
 
 
-fun <R, E, T> Result<R, E>.bind(fn: (R) -> Result<T, E>): Result<T, E> {
+suspend fun <R, E, T> Result<R, E>.bind(fn: suspend (R) -> Result<T, E>): Result<T, E> {
     return when(this) {
         is Success -> fn(this.value)
         is Failure -> Failure(this.reason)
@@ -44,7 +44,7 @@ fun <T, E> E.fail(): Result<T, E> {
 }
 
 
-fun <R, E, T> Iterable<T>.mapM(fn: (T) -> Result<R, E>): Result<List<R>, E> {
+suspend fun <R, E, T> Iterable<T>.mapM(fn: suspend (T) -> Result<R, E>): Result<List<R>, E> {
     var listToWrap: MutableList<R> = mutableListOf()
     for (item in this) {
         when(val mappingResult = fn(item)) {

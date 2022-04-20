@@ -19,7 +19,7 @@ typealias MutableContext = MutableMap<Expression.NameNode, Expression>
  * @param expectType What type to expect at the end
  * @return Fully evaluated expression or an error message
  */
-fun evaluateExpression(
+suspend fun evaluateExpression(
     expr: Expression, context: Context, expectType: ExpressionType = ExpressionType.Unknown
 ) : Result<Expression, String>
 {
@@ -182,7 +182,7 @@ fun evaluateExpression(
 }
 
 
-fun expressionToString(expr: Expression, context: Context) : Result<String, String> {
+suspend fun expressionToString(expr: Expression, context: Context) : Result<String, String> {
     return when(expr) {
         is Expression.NumberNode -> expr.value.toString().success()
         is Expression.NameNode ->
@@ -209,7 +209,7 @@ fun expressionToString(expr: Expression, context: Context) : Result<String, Stri
 }
 
 
-fun evaluateStatement(stmt: Statement, context: MutableContext) : Result<String, String> {
+suspend fun evaluateStatement(stmt: Statement, context: MutableContext) : Result<String, String> {
     return when(stmt) {
         is Statement.VarDeclarationStmt ->
             {
@@ -227,7 +227,7 @@ fun evaluateStatement(stmt: Statement, context: MutableContext) : Result<String,
 }
 
 
-fun evaluateStmtList(stmts: List<Statement>, context: MutableContext) : Result<String, String> {
+suspend fun evaluateStmtList(stmts: List<Statement>, context: MutableContext) : Result<String, String> {
     return (
         stmts
         .mapM { evaluateStatement(it, context) }
