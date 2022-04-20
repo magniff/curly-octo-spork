@@ -7,6 +7,7 @@ import Parser.Expression
 import Parser.Statement
 import Parser.ExpressionType
 import Result.*
+import kotlinx.coroutines.yield
 
 typealias Context = Map<Expression.NameNode, Expression>
 typealias MutableContext = MutableMap<Expression.NameNode, Expression>
@@ -149,6 +150,8 @@ suspend fun evaluateExpression(
             var resultSoFar = evaluateExpression(expr.primer, context, ExpressionType.Number)
             // So, here we know that sequence evaluation succeeded
             for (member in (sequence as Success<Expression.Sequence>).value.operands) {
+                // Going back to the caller on each iteration
+                yield()
                 if (!resultSoFar.isSuccess()) {
                     return resultSoFar
                 }
@@ -159,6 +162,8 @@ suspend fun evaluateExpression(
             resultSoFar
         }
     }
+
+    yield()
     return evaluationResult.bind {
         expression ->
             // While the evaluator is still happy, let us check the type of the result

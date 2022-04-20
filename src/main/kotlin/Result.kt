@@ -1,6 +1,9 @@
 package Result
 
 
+import kotlinx.coroutines.yield
+
+
 // Kotlin has its own stdlib implementation of Result type, which looks a bit
 // wierd though https://stackoverflow.com/questions/56900407/does-kotlin-have-a-result-type-like-swift
 sealed class Result<out Success, out Failure>
@@ -47,6 +50,10 @@ fun <T, E> E.fail(): Result<T, E> {
 suspend fun <R, E, T> Iterable<T>.mapM(fn: suspend (T) -> Result<R, E>): Result<List<R>, E> {
     var listToWrap: MutableList<R> = mutableListOf()
     for (item in this) {
+        /**
+         * Going back to the caller on each iteration
+         */
+        yield()
         when(val mappingResult = fn(item)) {
             is Success -> listToWrap.add(mappingResult.value)
             is Failure -> {

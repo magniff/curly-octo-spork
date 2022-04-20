@@ -33,6 +33,10 @@ suspend fun processInput(input: String, parser: LangParser) : Result<String, Str
     val (remaining, parserResult) = parser
         .wholeProgramP
         .parse(input)
+    /**
+     * It's a good time for a cup of tea
+     */
+    yield()
     return when (parserResult) {
         null -> "Syntax error: unable to parse ${remaining.unparsed()}".fail()
         else -> {
