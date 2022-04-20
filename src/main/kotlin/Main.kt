@@ -35,11 +35,7 @@ val GREEN = Color(0, 200, 0, 20)
 @Composable
 fun TextBox(text: String, color: Color) {
     Box(
-        modifier = Modifier
-//            .height(32.dp)
-//            .width(400.dp)
-            .background(color),
-//            .padding(start = 10.dp),
+        modifier = Modifier.background(color),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(text = text)
@@ -80,7 +76,11 @@ suspend fun main() = awaitApplication {
 
         // Main widget
         MaterialTheme {
-            Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
+            Column(
+                Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 // Draw the output
                 TextBox(outputBuffer.value, color = if (isError.value) RED else GREEN)
                 // Grab the user's input here
