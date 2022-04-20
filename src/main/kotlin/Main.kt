@@ -16,10 +16,16 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
+import kotlinx.coroutines.Dispatchers
+
+
 import KotZen.parse
 import Parser.*
 import Evaluator.*
 import Result.*
+import androidx.compose.ui.window.awaitApplication
 
 
 val RED = Color(200, 0, 0, 20)
@@ -58,19 +64,26 @@ fun processInput(input: String, parser: LangParser) : Result<String, String> {
 }
 
 
-fun main() = application {
+suspend fun main() = awaitApplication {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Compose for Desktop",
         state = rememberWindowState(width = 300.dp, height = 300.dp)
     ) {
+        val parser = LangParser()
+        // Text, that being passed from the user
         val inputBuffer = remember { mutableStateOf("") }
+        // Text, that being return by the runner
         val outputBuffer = remember { mutableStateOf("No input...") }
+        // Flag, indicating the presence of an error
         val isError = remember { mutableStateOf(false) }
 
-        val parser = LangParser()
+        // Main widget
         MaterialTheme {
             Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
+                // Draw the output
+                TextBox(outputBuffer.value, color = if (isError.value) RED else GREEN)
+                // Grab the user's input here
                 TextField(
                     inputBuffer.value,
                     {
@@ -82,20 +95,14 @@ fun main() = application {
                                     outputBuffer.value = result.value
                                 }
                                 is Failure -> {
-                                    if (inputBuffer.value != "") {
-                                        isError.value = true
-                                        outputBuffer.value = result.reason
-                                    } else {
-                                        isError.value = false
-                                        outputBuffer.value = "No input..."
-                                    }
+                                    isError.value = true
+                                    outputBuffer.value = result.reason
                                 }
                             }
                     },
                     isError = isError.value,
                     placeholder = {Text("Type your code here...")}
                 )
-                TextBox(outputBuffer.value, color = if (isError.value) RED else GREEN)
             }
         }
     }

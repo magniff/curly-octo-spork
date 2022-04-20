@@ -42,14 +42,18 @@ fun evaluateExpression(
                         evaluateExpression(expr.to, context, ExpressionType.Number)
                             .bind {
                                 toValue ->
-                                    Expression.Sequence(
-                                        ((fromValue as Expression.NumberNode).value.toInt()..
-                                        (toValue as Expression.NumberNode).value.toInt())
-                                        .map { Expression.NumberNode(it.toFloat()) }
-                                    )
-                                    .success()
+                                    // As we now have fromValue and toValue expressions, it is time to sanity check the
+                                    // range itself
+                                    if ((fromValue as Expression.NumberNode).value > (toValue as Expression.NumberNode).value)
+                                        "Range is malformed, starting value is greater than the ending one".fail()
+                                    else
+                                        Expression.Sequence(
+                                            (fromValue.value.toInt().. toValue.value.toInt())
+                                            .map { Expression.NumberNode(it.toFloat()) }
+                                        )
+                                        .success()
+                                }
                             }
-                }
         is Expression.AddNode ->
             expr
                 .operands

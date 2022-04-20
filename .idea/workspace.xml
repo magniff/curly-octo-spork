@@ -6,11 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="63802c53-8f45-4eae-800c-67663cbfbf49" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/KotZen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/KotZen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/Evaluator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Evaluator.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Main.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/Parser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Parser.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/EvaluatorKtTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/EvaluatorKtTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/ParserKtTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/ParserKtTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,17 +30,7 @@
             <expand>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="newkotlin" type="f1a62948:ProjectNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="newkotlin" type="f1a62948:ProjectNode" />
-                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="newkotlin" type="f1a62948:ProjectNode" />
-                <item name="Run Configurations" type="7b0102dc:RunConfigurationsNode" />
+                <item name="mylang" type="f1a62948:ProjectNode" />
               </path>
             </expand>
             <select />
@@ -183,11 +170,19 @@
     </configuration>
     <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="MainKt" />
-      <module name="newkotlin.main" />
+      <module name="mylang.main" />
+      <shortenClasspath name="NONE" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Gradle.ToolsKtTest" />
+      <item itemvalue="Gradle.ToolsKtTest.test_expressionP (1)" />
+      <item itemvalue="Gradle.ToolsKtTest.test_lambda1P" />
+      <item itemvalue="Gradle.ToolsKtTest.test_numberP" />
+      <item itemvalue="Kotlin.MainKt" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Kotlin.MainKt" />
