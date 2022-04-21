@@ -39,17 +39,14 @@ internal class EvaluatorKtTest {
     @Test
     fun test_evalSequenceRange() {
         /**
-         * {0 .. 2} == {0, 1, 2}
+         * {0 .. 2} == {0 .. 2}
          */
         assertEquals(
             Success(
-                Expression.Sequence(
-                    listOf(
-                        Expression.NumberNode(0.0.toFloat()),
-                        Expression.NumberNode(1.0.toFloat()),
-                        Expression.NumberNode(2.0.toFloat())
-                    )
-                )
+                Expression.SequenceRange(
+                    Expression.NumberNode(0.0.toFloat()),
+                    Expression.NumberNode(2.0.toFloat())
+                ),
             ),
             runBlocking { evaluateExpression(
                 Expression.SequenceRange(
@@ -64,14 +61,9 @@ internal class EvaluatorKtTest {
          */
         assertEquals(
             Success(
-                Expression.Sequence(
-                    listOf(
-                        Expression.NumberNode(0.0.toFloat()),
-                        Expression.NumberNode(1.0.toFloat()),
-                        Expression.NumberNode(2.0.toFloat()),
-                        Expression.NumberNode(3.0.toFloat()),
-                        Expression.NumberNode(4.0.toFloat())
-                    )
+                Expression.SequenceRange(
+                    Expression.NumberNode(0.0.toFloat()),
+                    Expression.NumberNode(4.0.toFloat()),
                 )
             ),
             runBlocking {
@@ -454,7 +446,7 @@ internal class EvaluatorKtTest {
             }
         )
         assertEquals(
-            Success("{0.0, 1.0, 2.0}"),
+            Success("{0.0 .. 2.0}"),
             runBlocking {
                 expressionToString(
                     Expression.SequenceRange(

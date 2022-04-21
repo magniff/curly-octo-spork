@@ -39,33 +39,36 @@ data class Lambda2(
 ) : ASTNode()
 
 
-enum class ExpressionType {
-    Number,
-    Sequence,
-    Unknown
+
+sealed class ExpressionType() {
+    object Number : ExpressionType()
+    object Sequence : ExpressionType()
+    object SequenceRange : ExpressionType()
+    object Whatever : ExpressionType()
+    data class Or(val options: List<ExpressionType>) : ExpressionType()
 }
 
 sealed class Expression(val type : ExpressionType) : ASTNode() {
     data class NumberNode(val value: Float) : Expression(ExpressionType.Number)
-    data class NameNode(val value: String) : Expression(ExpressionType.Unknown)
-    data class AddNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
-    data class SubNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
-    data class MulNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
-    data class DivNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
-    data class PowNode(val operands: List<Expression>) : Expression(ExpressionType.Unknown)
-    data class SequenceRange(val from: Expression, val to: Expression) : Expression(ExpressionType.Sequence)
+    data class NameNode(val value: String) : Expression(ExpressionType.Whatever)
+    data class AddNode(val operands: List<Expression>) : Expression(ExpressionType.Whatever)
+    data class SubNode(val operands: List<Expression>) : Expression(ExpressionType.Whatever)
+    data class MulNode(val operands: List<Expression>) : Expression(ExpressionType.Whatever)
+    data class DivNode(val operands: List<Expression>) : Expression(ExpressionType.Whatever)
+    data class PowNode(val operands: List<Expression>) : Expression(ExpressionType.Whatever)
+    data class SequenceRange(val from: Expression, val to: Expression) : Expression(ExpressionType.SequenceRange)
     data class Sequence(val operands: List<Expression>) : Expression(ExpressionType.Sequence)
 
     data class Map(
         val sequence: Expression,
         val mapper: Lambda1
-    ) : Expression(ExpressionType.Unknown)
+    ) : Expression(ExpressionType.Whatever)
 
     data class Reduce(
         val sequence: Expression,
         val primer: Expression,
         val reducer: Lambda2
-    ) : Expression(ExpressionType.Unknown)
+    ) : Expression(ExpressionType.Whatever)
 }
 
 
